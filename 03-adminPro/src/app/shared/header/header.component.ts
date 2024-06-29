@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Usuario } from 'src/app/models/usuario.model';
 import { UsuarioService } from 'src/app/services/usuario.service';
 
 @Component({
@@ -8,7 +9,15 @@ import { UsuarioService } from 'src/app/services/usuario.service';
 })
 export class HeaderComponent implements OnInit {
 
-  constructor(private usuarioService: UsuarioService) { }
+  public imgUrl: string | undefined = '';
+
+  public usuario!: Usuario | undefined;
+
+  constructor(private usuarioService: UsuarioService) { 
+    this.imgUrl = usuarioService.usuario?.imagenUrl;
+
+    this.usuario = usuarioService.usuario;
+  }
 
   ngOnInit(): void {
   }
