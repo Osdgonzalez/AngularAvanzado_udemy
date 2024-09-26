@@ -3,10 +3,11 @@ import { HttpClient } from "@angular/common/http";
 import { RegisterForm } from '../interfaces/register-form.interface';
 import { environment } from 'src/environments/environment';
 import { LoginForm } from '../interfaces/login-form.interface';
-import { catchError, map, tap } from "rxjs/operators";
+import { catchError, delay, map, tap } from "rxjs/operators";
 import { Observable, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { Usuario } from '../models/usuario.model';
+import { CargarUsuaruios } from '../interfaces/cargar-usuarios.interface';
 
 declare const google: any;
 
@@ -32,6 +33,14 @@ export class UsuarioService {
 
     const uid = this.usuario?.uid || '';
     return uid;
+  }
+
+  get headers(){
+    return {
+      headers:{
+        'x-token': this.token
+      }
+    }
   }
 
   logout(){
@@ -66,7 +75,12 @@ export class UsuarioService {
       role: this.usuario?.role || ''
     }
 
-    return this.http.put(`${this.url}/usuarios/${this.uid}` , data , { headers: { 'x-token': this.token } });
+    return this.http.put(`${this.url}/usuarios/${this.uid}` , data , this.headers);
+  }
+
+  cambiarUsuario( usuario: Usuario ){
+
+    return this.http.put(`${this.url}/usuarios/${usuario.uid}` , usuario , this.headers);
   }
 
   login( formData: LoginForm){
@@ -108,5 +122,36 @@ export class UsuarioService {
       map(resp => true),
       catchError( error => of(false) )
     );
+  }
+
+  cargarUsuarios( desde: number = 0 ){
+
+    const url = `${this.url}/usuarios?desde=${desde}`;
+
+    return this.http.get<CargarUsuaruios>(url , this.headers).
+      pipe(
+        //delay(5000),
+        map(resp => {
+          console.log('resp cargar usuarios ' , resp.obj);
+          //Fue necesario crear un objeto de instancia de clase(Usuario) para poder obtener url de la imagen
+          const usuarios = resp.obj.map(user => 
+              new Usuario(user.nombre , user.email, user.uid , '' , user.role , user.google , user.img ))
+
+              console.log('usuarios cargar usuarios ' , resp.obj);
+              console.log('usuarios cargar usuarios 2 ' , usuarios);
+          return {
+            total: resp.total,
+            obj: usuarios
+          }
+        })
+      );
+
+  }
+
+  eliminarUsuario(usuario: Usuario){
+    const url = `${this.url}/usuarios/${usuario.uid}`;
+    
+    return this.http.delete(url , this.headers);
+    
   }
 }
