@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { delay, Subscription } from 'rxjs';
+import { Hospital } from 'src/app/models/hospital.model';
 import { Usuario } from 'src/app/models/usuario.model';
 import { BusquedasService } from 'src/app/services/busquedas.service';
 import { ModalImagenService } from 'src/app/services/modal-imagen.service';
@@ -73,9 +74,14 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     }
 
     this.busquedaService.buscar('usuarios' , termino).subscribe(
-      resp => {
-         this.usuarios = resp!;
-         return;
+      (resp) => {
+
+        this.usuarios = resp as Usuario[];
+        return;
+        // if(this.esUsuario(resp)){
+        //   this.usuarios = resp!;
+        //   return;
+        // }
       }
     );
     
@@ -138,5 +144,11 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   abrirModal( usuario: Usuario ){
     this.modalImagenService.abrirModal('usuarios' , usuario.uid! , usuario.img);
   }
+
+  // esUsuario(arr: Usuario[] | Hospital[] | undefined): arr is Usuario[]{
+
+  //   return arr!.length > 0;
+  // }
+
 
 }
