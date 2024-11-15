@@ -46,6 +46,7 @@ export class PerfilComponent implements OnInit {
       Swal.fire('Guardado' , 'Los cambios fueron guardados con éxito' , 'success');
     },
     (err) => {
+      
       Swal.fire('Error' , err.error.msg , 'error');
       console.log(err);
       

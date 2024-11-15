@@ -29,9 +29,16 @@ export class UsuarioService {
     return token;
   }
 
+  get role(): 'ADMIN_ROLE' | 'USER_ROLE'{
+
+    return this.usuario?.role!;
+  }
+
   get uid(): string{
 
     const uid = this.usuario?.uid || '';
+    console.log(uid);
+    
     return uid;
   }
 
@@ -43,8 +50,14 @@ export class UsuarioService {
     }
   }
 
+  guardarLocalStorage(token: string , menu: any){
+    localStorage.setItem('token' , token);
+    localStorage.setItem('menu' , JSON.stringify(menu));
+  }
+
   logout(){
     localStorage.removeItem('token');
+    localStorage.removeItem('menu');
     // this.router.navigateByUrl('/login');
 
     google.accounts.id.revoke('0skr159@gmail.com' , () => {
@@ -62,7 +75,7 @@ export class UsuarioService {
     return this.http.post(`${this.url}/usuarios` , formData)
                     .pipe(
                       tap((resp: any) => {
-                        localStorage.setItem('token' , resp.token);
+                        this.guardarLocalStorage(resp.token , resp.menu)
                       })
                     );                      
     
@@ -75,6 +88,8 @@ export class UsuarioService {
       role: this.usuario?.role || ''
     }
 
+    console.log(this.uid);
+    
     return this.http.put(`${this.url}/usuarios/${this.uid}` , data , this.headers);
   }
 
@@ -87,7 +102,7 @@ export class UsuarioService {
     return this.http.post(`${this.url}/login` , formData)
                     .pipe(
                       tap((resp: any) => {
-                        localStorage.setItem('token' , resp.token);
+                        this.guardarLocalStorage(resp.token , resp.menu)
                       })
                     );
   }
@@ -97,7 +112,7 @@ export class UsuarioService {
     return this.http.post(`${this.url}/login/google` , { token: tokenGoogle })
     .pipe(
       tap( (resp: any) => {
-        localStorage.setItem('token' , resp.token);
+        this.guardarLocalStorage(resp.token , resp.menu)
       })
     );
 
@@ -113,11 +128,14 @@ export class UsuarioService {
         //Se crea un objeto de tipo usuario con la informacion del usuario que inicio sesion
         const { nombre , email , password , role , img = '' , google , uid } = resp.usuario;
 
-        this.usuario = new Usuario(nombre , email , password , role , google , img , uid);
-
-        console.log(resp);
+        // this.usuario = new Usuario(nombre , email , password , role , google , img , uid);
+        this.usuario = new Usuario(nombre , email , uid , password , role , google , img );
         
-        localStorage.setItem('token' , resp.token);
+        console.log(resp);
+        console.log('verifica token ' , this.usuario);
+        
+        
+        this.guardarLocalStorage(resp.token , resp.menu)
       }),
       map(resp => true),
       catchError( error => of(false) )

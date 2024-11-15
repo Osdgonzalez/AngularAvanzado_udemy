@@ -30,7 +30,6 @@ export class BusquedasService {
   }
 
   transformarUsuario(resultado: any[]): Usuario[]{
-    console.log('holaa');
     
     return resultado.map( (user) => new Usuario(user.nombre , user.email , '' , user.role , user.google , user.img , user.uid)
     );
@@ -75,6 +74,13 @@ export class BusquedasService {
         }
       )
     );
+  }
+
+  busquedaGlobal(termino: string){
+
+    const url = `${this.url}/todo/${termino}`;
+
+    return this.http.get(url , this.headers);
   }
 
 
